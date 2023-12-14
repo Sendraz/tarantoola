@@ -1,5 +1,5 @@
 # tarantoola
-Simple crappy web crawler written in python using requests.
+Simple crappy web crawler written in python using requests library.
 
 Usage: tarantoola.py [url] [options]
 
