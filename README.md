@@ -1,2 +1,2 @@
 # tarantoola
-Simple crappy web crawler
+Simple crappy web crawler written in python using requests.
