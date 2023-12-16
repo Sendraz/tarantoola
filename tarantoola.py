@@ -38,7 +38,7 @@ class Scanner(HTMLParser):
         return self.urls
 #main crawler class
 class Crawler:
-    def __init__(self, target_host, headers, cookies):
+    def __init__(self, target_host, headers, cookies, outfile = None):
         self.target_host = target_host
         self.session = requests.Session()
         self.session.max_redirects = 10000
@@ -49,6 +49,10 @@ class Crawler:
         self.headers = headers
         self.found = []
 
+        self.outfile = outfile
+        if(outfile):
+            self.outfile = open(outfile, "w")
+
     def parseHTML(self, data):
         #search for urls and forms in html code
         scan = Scanner(self.target_host)
@@ -58,6 +62,8 @@ class Crawler:
 
     def fetchUrl(self, target):
         self.found.append(target)
+        if(self.outfile):
+            self.outfile.write(target + "\n")
         resp = None
         try:
             resp = self.session.get(target, headers=self.headers, cookies=self.cookies, timeout=5)
@@ -73,13 +79,20 @@ class Crawler:
                         if self.sub_domains == True and re.search("^.*" + self.target_host[self.target_host.find("."):], u): #if is on the same domain + subdomains
                             self.fetchUrl(u)
                         elif self.target_host in u: #if is on the same domain
-                           self.fetchUrl(u)
+                            self.fetchUrl(u)
         
     def start(self, sub_domains):
         self.sub_domains = sub_domains
         print("crawling in my skin...")
-        self.fetchUrl(self.target_host)
-
+        try:
+            self.fetchUrl(self.target_host)
+        except KeyboardInterrupt:
+            print("exiting...")
+        finally:
+            self.session.close()
+            if(self.outfile):
+                self.outfile.close()
+        
 def prepareOpts(opts):
     cookies = {}
     headers = {}
@@ -102,13 +115,14 @@ if __name__ == "__main__":
     parser.add_option("-e", "--header", dest="header", help="add custom header to requests")
     parser.add_option("-u", "--user-agent", dest="user_agent", help="set user agent, default=" + defaultUserAgent)
     parser.add_option("-s", "--subdomain-scan", action="store_true", dest="sub", help="scans and outputs subdomains found on websites")
+    parser.add_option("-o", "--output", dest="outfile", help="outputs found urls to file")
     (opts, args) = parser.parse_args()
     headers, cookies = prepareOpts(opts)
     
     if(len(args) < 1):
         print("please provide target url!")
         sys.exit(-1)
-    crawler = Crawler(args[0], headers, cookies)
+    crawler = Crawler(args[0], headers, cookies, opts.outfile)
     crawler.start(opts.sub)
     
 
