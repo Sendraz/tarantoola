@@ -84,9 +84,9 @@ class Crawler:
             for u in urls:
                 if u not in self.found:
                     if self.sub_domains == True and re.search("^.*" + self.target_host[self.target_host.find("."):], u): #if is on the same domain + subdomains
-                       urls.append(self.fetchUrls(u))
+                       urls += self.fetchUrls(u)
                     elif self.target_host in u: #if is on the same domain
-                       urls.append(self.fetchUrls(u))
+                       urls += self.fetchUrls(u)
         except KeyboardInterrupt:
             print("exiting...")
         finally:
