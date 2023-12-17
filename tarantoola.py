@@ -60,7 +60,7 @@ class Crawler:
         scan.close()
         return scan.getURLs()
 
-    def fetchUrl(self, target):
+    def fetchUrls(self, target):
         self.found.append(target)
         if(self.outfile):
             self.outfile.write(target + "\n")
@@ -74,18 +74,19 @@ class Crawler:
             print(target + " = " + str(resp.status_code))
             if(resp.ok):
                 urls = self.parseHTML(resp.text)
-                for u in urls:
-                    if u not in self.found:
-                        if self.sub_domains == True and re.search("^.*" + self.target_host[self.target_host.find("."):], u): #if is on the same domain + subdomains
-                            self.fetchUrl(u)
-                        elif self.target_host in u: #if is on the same domain
-                            self.fetchUrl(u)
+        return urls
         
     def start(self, sub_domains):
         self.sub_domains = sub_domains
         print("crawling in my skin...")
         try:
-            self.fetchUrl(self.target_host)
+            urls = self.fetchUrls(self.target_host)
+            for u in urls:
+                if u not in self.found:
+                    if self.sub_domains == True and re.search("^.*" + self.target_host[self.target_host.find("."):], u): #if is on the same domain + subdomains
+                       urls.append(self.fetchUrls(u))
+                    elif self.target_host in u: #if is on the same domain
+                       urls.append(self.fetchUrls(u))
         except KeyboardInterrupt:
             print("exiting...")
         finally:
