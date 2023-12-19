@@ -3,6 +3,7 @@ import json
 import optparse
 import sys
 import re
+import time
 from html.parser import HTMLParser
 
 
@@ -67,7 +68,7 @@ class Crawler:
         resp = None
         try:
             resp = self.session.get(target, headers=self.headers, cookies=self.cookies, timeout=5)
-        except requests.exceptions.InvalidSchema:
+        except (requests.exceptions.InvalidSchema, requests.exceptions.MissingSchema):
             print("found url is not valid! " + target)
         urls = []
         if(resp):
@@ -76,7 +77,7 @@ class Crawler:
                 urls = self.parseHTML(resp.text)
         return urls
         
-    def start(self, sub_domains):
+    def start(self, sub_domains, delay=0):
         self.sub_domains = sub_domains
         print("crawling in my skin...")
         try:
@@ -87,6 +88,7 @@ class Crawler:
                        urls += self.fetchUrls(u)
                     elif self.target_host in u: #if is on the same domain
                        urls += self.fetchUrls(u)
+                time.sleep(int(delay))
         except KeyboardInterrupt:
             print("exiting...")
         finally:
@@ -117,6 +119,7 @@ if __name__ == "__main__":
     parser.add_option("-u", "--user-agent", dest="user_agent", help="set user agent, default=" + defaultUserAgent)
     parser.add_option("-s", "--subdomain-scan", action="store_true", dest="sub", help="scans and outputs subdomains found on websites")
     parser.add_option("-o", "--output", dest="outfile", help="outputs found urls to file")
+    parser.add_option("-d", "--delay", dest="delaytime", help="sets delays between requests in seconds", default="0")
     (opts, args) = parser.parse_args()
     headers, cookies = prepareOpts(opts)
     
@@ -124,7 +127,7 @@ if __name__ == "__main__":
         print("please provide target url!")
         sys.exit(-1)
     crawler = Crawler(args[0], headers, cookies, opts.outfile)
-    crawler.start(opts.sub)
+    crawler.start(opts.sub, opts.delaytime)
     
 
 
