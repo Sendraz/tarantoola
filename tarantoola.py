@@ -88,7 +88,7 @@ class Crawler:
                        urls += self.fetchUrls(u)
                     elif self.target_host in u: #if is on the same domain
                        urls += self.fetchUrls(u)
-                time.sleep(int(delay))
+                time.sleep(float(delay))
         except KeyboardInterrupt:
             print("exiting...")
         finally:
