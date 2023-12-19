@@ -10,3 +10,4 @@ Options: <br/>
 -u USER_AGENT, --user-agent=USER_AGENT <br/>
 -s, --subdomain-scan <br/>
 -o, --output <br/>
+-d, --delay <br/>
