@@ -67,13 +67,13 @@ class Crawler:
             self.outfile.write(target + "\n")
         resp = None
         try:
-            resp = self.session.get(target, headers=self.headers, cookies=self.cookies, timeout=5)
+            resp = self.session.get(target, headers=self.headers, cookies=self.cookies, timeout=30)
         except (requests.exceptions.InvalidSchema, requests.exceptions.MissingSchema):
             print("found url is not valid! " + target)
         urls = []
         if(resp):
             print(target + " = " + str(resp.status_code))
-            if(resp.ok):
+            if(resp.ok and "text/html" in resp.headers["Content-Type"] or "text/xml" in resp.headers["Content-Type"]):
                 urls = self.parseHTML(resp.text)
         return urls
         
