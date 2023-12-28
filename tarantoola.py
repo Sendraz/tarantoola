@@ -44,9 +44,7 @@ class Crawler:
         self.session = requests.Session()
         self.session.max_redirects = 10000
 
-        self.cookies = {}  
-        if cookies:
-            self.cookies = cookies
+        self.session.cookies.update(cookies)
         self.headers = headers
         self.found = []
 
@@ -67,7 +65,7 @@ class Crawler:
             self.outfile.write(target + "\n")
         resp = None
         try:
-            resp = self.session.get(target, headers=self.headers, cookies=self.cookies, timeout=30)
+            resp = self.session.get(target, headers=self.headers, timeout=30)
         except (requests.exceptions.InvalidSchema, requests.exceptions.MissingSchema):
             print("found url is not valid! " + target)
         urls = []
@@ -84,7 +82,7 @@ class Crawler:
             urls = self.fetchUrls(self.target_host)
             for u in urls:
                 if u not in self.found:
-                    if self.sub_domains == True and re.search("^.*" + self.target_host[self.target_host.find("."):], u): #if is on the same domain + subdomains
+                    if self.sub_domains == True and re.search("^.*" + self.target_host[0:self.target_host.rfind(".")], u): #if is on the same domain + subdomains
                        urls += self.fetchUrls(u)
                     elif self.target_host in u: #if is on the same domain
                        urls += self.fetchUrls(u)
